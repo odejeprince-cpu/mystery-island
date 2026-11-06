@@ -1,24 +1,56 @@
-print("====== MYSTERY ISLAND ======")
-print("You wake up on an island after a storm. Light the beacon to be rescued.")
+import game
 
-name = input("Enter your name: ").strip()
-print(f"Welcome, {name}!")
 
-print("You stand on a beach. The lighthouse is dark in the distance.")
+def play(name):
+    """Run one game. Return True if it finished, False if the player quit."""
+    player = game.new_game(name)
+    print()
+    print(game.describe(player))
 
-running = True
-while running:
-    print("\n1. Look around")
-    print("2. Go to Jungle")
-    print("3. Quit")
-    choice = input("Choose an option (1-3): ").strip().lower()
+    while not game.is_over(player):
+        actions = game.available_actions(player)
+        inventory = ", ".join(player["inventory"]) or "empty"
+        print(f"\nLocation: {player['location']} | Energy: {player['energy']} | Inventory: {inventory}")
+        for number, action in enumerate(actions, start=1):
+            print(f"{number}. {game.label(player, action)}")
+        print("q. Quit")
 
-    if choice == "1":
-        print("Dry sand, a sunny afternoon, and waves.")
-    elif choice == "2":
-        print("You head into the jungle...")
-    elif choice == "3":
-        print("Goodbye!")
-        running = False
+        choice = input("> ").strip().lower()
+
+        if choice in ("q", "quit", "exit"):
+            print("Goodbye!")
+            return False
+
+        if not choice.isdigit() or not 1 <= int(choice) <= len(actions):
+            print(f"Invalid choice. Enter a number from 1 to {len(actions)}, or q.")
+            continue
+
+        print(game.apply_action(player, actions[int(choice) - 1]))
+
+    if player["won"]:
+        print(f"\n*** YOU WIN, {name}! ***")
     else:
-        print("Invalid choice. Please enter 1, 2 or 3.")
+        print(f"\n*** GAME OVER, {name}. ***")
+    return True
+
+
+def main():
+    print("====== MYSTERY ISLAND: THE LOST LIGHTHOUSE ======")
+    print("You wake up on an island after a storm. Light the beacon to be rescued.")
+    print("Every move costs 1 energy. Find the rope and the lantern first.")
+
+    name = input("Enter your name: ").strip() or "Stranger"
+    print(f"Welcome, {name}!")
+
+    while True:
+        finished = play(name)
+        if not finished:
+            break
+        again = input("\nPlay again? (y/n): ").strip().lower()
+        if again != "y":
+            print("Thanks for playing!")
+            break
+
+
+if __name__ == "__main__":
+    main()
